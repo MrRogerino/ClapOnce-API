@@ -50,8 +50,8 @@ class UsersController < ApplicationController
     affected_users.each do |user|
       change_status(user, "pending")
     end
-
     return affected_users
+    
   end
 
   def radius_affected(severity)
