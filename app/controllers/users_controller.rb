@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  EARTH_RADIUS = 3961
+  include UsersHelper
 
   def index
     @users = alert_users([0,0], "moderate")
@@ -29,6 +29,7 @@ class UsersController < ApplicationController
   end
 
   private
+  EARTH_RADIUS = 3961
 
   def alert_users(epicenter, severity)
     affected_users = []
@@ -39,7 +40,7 @@ class UsersController < ApplicationController
     end
 
     affected_users.each do |user|
-      user.status = "pending"
+      change_status(user, "pending")
     end
 
     return affected_users
@@ -54,8 +55,7 @@ class UsersController < ApplicationController
     end
   end
 
-
-  def distance(epicenter,user_location) #gets distance between two points in miles
+  def distance(epicenter,user_location) #gets distance between two points (in miles)
     d_longitude = toRadians((epicenter[1]-user_location[1]))
     d_latitude = toRadians((epicenter[0]-user_location[0]))
 
@@ -66,15 +66,16 @@ class UsersController < ApplicationController
     rad_user_lat = toRadians(epicenter[1])
 
     a = sin_d_lat ** 2 + Math.cos(rad_epi_lat) * Math.cos(rad_user_lat) * (sin_d_long ** 2)
-    c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+    c = Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
     return EARTH_RADIUS * c
   end
 
   def change_status(user, status)
-    user.status = status
+    user.update_attribute(:status, status)
   end
 
-  def toRadians(degree)
+  def toRadians(degrees)
     return degrees * Math::PI / 180
   end
+
 end
