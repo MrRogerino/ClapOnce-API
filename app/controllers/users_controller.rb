@@ -1,8 +1,11 @@
 class UsersController < ApplicationController
   include UsersHelper
 
-  def index
-    @users = alert_users([0,0], "moderate")
+  def notify_users
+    epicenter = [params[:lat].to_i, params[:long].to_i]
+    severity = params[:severity]
+    @users = alert_users(epicenter, severity)
+
     render json: {users: @users}.as_json, status: 201
   end
 
