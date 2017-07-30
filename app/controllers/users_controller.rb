@@ -2,15 +2,7 @@ class UsersController < ApplicationController
   EARTH_RADIUS = 3961
 
   def index
-    @users = []
-    User.find_each do |user|
-       if distance([0,0],user.location) < 5 #replace [0,0] with epicenter
-         @users << user
-       end
-    end
-    @users.each do |user|
-      change_status(user, "safe")
-    end
+    @users = alert_users([0,0], "moderate")
     render json: {users: @users}.as_json, status: 201
   end
 
@@ -30,8 +22,8 @@ class UsersController < ApplicationController
   def update_location
     @user = User.find_by(id: params[:id])
     if @user
-      @user.update_attribute(:longitude, params[:x])
-      @user.update_attribute(:latitude, params[:y])
+      @user.update_attribute(:longitude, params[:long])
+      @user.update_attribute(:latitude, params[:lat])
     end
     render json: {location:@user.location}.as_json, status: 201
   end
@@ -41,7 +33,16 @@ class UsersController < ApplicationController
   def alert_users(epicenter, severity)
     affected_users = []
     User.find_each do |user|
-      if distance(epicenter, user.location).
+      if distance(epicenter, user.location) < radius_affected(severity)
+        affected_users << user
+      end
+    end
+
+    affected_users.each do |user|
+      user.status = "pending"
+    end
+
+    return affected_users
   end
 
   def radius_affected(severity)
