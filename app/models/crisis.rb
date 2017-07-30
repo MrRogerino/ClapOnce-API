@@ -1,0 +1,2 @@
+class Crisis < ApplicationRecord
+end
